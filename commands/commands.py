@@ -39,8 +39,12 @@ class HelloCommand(Command):
     
 class ImageAnalyser(Command):
     def execute(self):
+        from utils.image_downloader import ImageDownloader
+        
         attachment_id = next(iter(self.payload["data"]["resolved"]["attachments"]))
         attachment = self.payload["data"]["resolved"]["attachments"][attachment_id]
+        image_url = attachment["url"]
+        image_bytes = ImageDownloader.get_image(image_url)
 
         return {
             "type": 4,
