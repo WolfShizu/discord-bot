@@ -7,7 +7,8 @@ class CommandMap:
             dict: chave: comando(str) | valor: Classe do comando (comando acessado com .execute)
         """
         return {
-            "hello": HelloCommand
+            "hello": HelloCommand,
+            "analisar_imagem": ImageAnalyser
         }
 
 class Command:
@@ -33,5 +34,17 @@ class HelloCommand(Command):
             "type": 4,
             "data": {
                 "content": f"Olá {self.payload["member"]["user"]["username"]}!"
+            } 
+        }
+    
+class ImageAnalyser(Command):
+    def execute(self):
+        attachment_id = next(iter(self.payload["data"]["resolved"]["attachments"]))
+        attachment = self.payload["data"]["resolved"]["attachments"][attachment_id]
+
+        return {
+            "type": 4,
+            "data": {
+                "content": f"Nome da imagem: {attachment["filename"]}\nurl da imagem: {attachment["url"]}"
             } 
         }
