@@ -2,7 +2,8 @@ import os
 
 from nacl.signing import VerifyKey
 
-class NaclUtils:
+class SignatureVerifier:
+    @staticmethod
     def verify_signature(event):
         """
         Verifica se a assinatura está correta
@@ -17,4 +18,7 @@ class NaclUtils:
         
         message = auth_ts.encode() + raw_body.encode()
         verify_key = VerifyKey(bytes.fromhex(PUBLIC_KEY))
-        verify_key.verify(message, bytes.fromhex(auth_sig)) 
+        try:
+            verify_key.verify(message, bytes.fromhex(auth_sig))
+        except Exception as e:
+            raise Exception(f"[UNAUTHORIZED] Assinatura de solicitação inválida: {e}")
