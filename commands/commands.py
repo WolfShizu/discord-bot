@@ -40,15 +40,29 @@ class HelloCommand(Command):
 class ImageAnalyser(Command):
     def execute(self):
         from utils.image_downloader import ImageDownloader
+        from aws.aws_rekognition import AWSRekognition
         
         attachment_id = next(iter(self.payload["data"]["resolved"]["attachments"]))
         attachment = self.payload["data"]["resolved"]["attachments"][attachment_id]
         image_url = attachment["url"]
         image_bytes = ImageDownloader.get_image(image_url)
 
+        labels = AWSRekognition.detect_labels(image_bytes)
+
+        names = [name["Name"] for name in labels["Labels"]]
+        confidences = [confidence["Confidence"] for confidence in labels["Labels"]]
+
+        content = [
+            f"Tenho ``{confidence:.2f}%`` de certeza da imagem conter um ``{name}``"
+            for name, confidence in zip(names, confidences)
+            ]
+
+        content = "\n".join(content)
+        content = content + f"\n[imagem]({attachment["url"]})"
+
         return {
             "type": 4,
             "data": {
-                "content": f"Nome da imagem: {attachment["filename"]}\nurl da imagem: {attachment["url"]}"
+                "content": content
             } 
         }
